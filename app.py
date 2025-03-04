@@ -1,30 +1,28 @@
 import streamlit as st
+import pandas as pd
 import joblib
 import numpy as np
-from prediction import predict_price  # Importar la función de predicción
 
-# Cargar el modelo entrenado
-model = joblib.load("data/final_model.pkl")
+@st.cache_resource
+def load_model():
+    return joblib.load("model.pkl")
 
-st.title("Predicción de Precios de Casas")
+model = load_model()
 
-# Definir las entradas
-st.sidebar.header("Ingresa los datos de la casa")
+st.title("Predicción de Precios de Casas 🏡")
+st.write("Ingrese las características de la casa para predecir su precio.")
 
-longitude = st.sidebar.number_input("Longitud", value=-118.25)
-latitude = st.sidebar.number_input("Latitud", value=34.05)
-housing_median_age = st.sidebar.number_input("Edad Media de la Casa", value=30)
-total_rooms = st.sidebar.number_input("Número Total de Habitaciones", value=2000)
-total_bedrooms = st.sidebar.number_input("Número Total de Dormitorios", value=500)
-population = st.sidebar.number_input("Población en la Zona", value=800)
-households = st.sidebar.number_input("Número de Hogares", value=400)
-median_income = st.sidebar.number_input("Ingreso Medio", value=3.5)
+longitude = st.number_input("Longitud", value=122.23)
+latitude = st.number_input("Latitud", value=37.88)
+housing_median_age = st.number_input("Edad de la Vivienda", value=41.0)
+total_rooms = st.number_input("Número Total de Habitaciones", value=8.0)
+total_bedrooms = st.number_input("Número Total de Dormitorios", value=12.0)
+population = st.number_input("Población", value=32.0)
+households = st.number_input("Número de Hogares", value=120.0)
+median_income = st.number_input("Ingreso Mediano", value=8.3252)
 
-# Crear un array con los datos ingresados
-input_data = [longitude, latitude, housing_median_age, total_rooms,
-              total_bedrooms, population, households, median_income]
-
-# Hacer la predicción cuando el usuario presiona el botón
-if st.sidebar.button("Predecir Precio"):
-    prediction = predict_price(model, input_data)
-    st.write(f"**Precio estimado de la casa:** ${prediction:,.2f}")
+if st.button("Predecir Precio"):
+    input_data = np.array([[longitude, latitude, housing_median_age, total_rooms, total_bedrooms, 
+                            population, households, median_income]])  
+    prediction = model.predict(input_data)
+    st.success(f"El precio estimado de la casa es: ${prediction[0]:,.2f}")
